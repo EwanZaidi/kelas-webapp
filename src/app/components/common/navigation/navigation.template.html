@@ -1,0 +1,267 @@
+<nav class="navbar-default navbar-static-side" role="navigation">
+  <div class="sidebar-collapse">
+    <ul class="nav metismenu" id="side-menu">
+      <li class="nav-header">
+        <div class="profile-element" dropdown>
+          <img *ngIf="(profile$|async) as profile" alt="image" class="img-circle" style="width: 42px; height:42px" src="{{profile.val.image_url}}">
+          <a dropdownToggle>
+            <span *ngIf="(profile$|async) as profile" class="block m-t-xs">
+              <strong class="font-bold">{{profile.val.display_name}}</strong>
+            </span>
+            <span *ngIf="(profile$|async) as profile" class="text-muted text-xs block">{{profile.val.title}}
+              <b class="caret"></b>
+            </span>
+          </a>
+          <ul class="animated fadeInRight dropdown-menu" *dropdownMenu>
+            <li>
+              <a (click)="profileModal.show()">Profile</a>
+            </li>
+          </ul>
+        </div>
+        <div class="logo-element">
+          KP
+        </div>
+      </li>
+      <li [ngClass]="{active: activeRoute('starter')}">
+        <a [routerLink]="['/recent']">
+          <i class="fa fa-th-large"></i>
+          <span class="nav-label">Recent Activity</span>
+        </a>
+      </li>
+      <li [ngClass]="{active: activeRoute('dashboard')}">
+        <a href="#">
+          <i class="fa fa-th-large"></i>
+          <span class="nav-label">Courses</span>
+          <span class="fa arrow"></span>
+        </a>
+        <ul class="nav nav-second-level collapse">
+          <li *ngFor="let c of courseList$ | async">
+            <a [routerLink]="['/courses/',c.key]">{{c.val.course_name}}</a>
+          </li>
+        </ul>
+      </li>
+      <li class="m-t">
+        <a (click)="createCourse.show()">
+          <i class="fa fa-plus"></i>
+          <span class="nav-label">Create Course</span>
+        </a>
+      </li>
+    </ul>
+
+  </div>
+</nav>
+
+<div bsModal #profileModal="bs-modal" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Account Settings</h5>
+      </div>
+      <div *ngIf="edited" class="alert alert-success">
+        <strong>Your setting has been updated</strong>
+      </div>
+      <ul class="nav nav-tabs" id="tabContent">
+        <li [ngClass]="{active: prof}">
+          <a (click)="tab('prof')" data-toggle="tab">Profile Info</a>
+        </li>
+        <li [ngClass]="{active: abt}">
+          <a (click)="tab('abt')" data-toggle="tab">About</a>
+        </li>
+        <li [ngClass]="{active: noti}">
+          <a (click)="tab('noti')" data-toggle="tab">Notifications</a>
+        </li>
+      </ul>
+      <div class="modal-body">
+        <div class="tab-content">
+          <div class="tab-pane" id="prof" [ngClass]="{active: prof}">
+
+            <div class="row">
+              <div class="col-md-2">
+                <img *ngIf="(profile$|async) as profile" alt="image" class="img-circle" style="width: 42px; height:42px" src="{{profile.val.image_url}}">
+              </div>
+              <div class="col-md-10">
+                <form #profileForm="ngForm">
+                  <div class="form-group">
+                    <label for="displayName">Display Name</label>
+                    <input type="text" class="form-control" minlength="4" maxlength="10" id="displayName" name="displayName" #displayName="ngModel"
+                      [ngModel]='(profile$|async)?.val.display_name' required>
+                    <div *ngIf="displayName.invalid && (displayName.dirty || displayName.touched)" class="alert alert-danger">
+                      <div *ngIf="displayName.errors.required">
+                        Display Name is required.
+                      </div>
+                      <div *ngIf="displayName.errors.minlength">
+                        Display Name must be more than 4 characters
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row form-group">
+                    <div class="col-md-5 text-left">
+                      <input #myImage accept="image/*" type="file" name="file" id="file" class="inputfile" (change)="handleFiles($event)"/>
+                      <label for="file">Change profile photo</label>
+                    </div>
+                    <div class="col-md-2 text-center">
+                      <p class="text-muted">
+                        <small>|</small>
+                      </p>
+                    </div>
+                    <div class="col-md-5 text-right">
+                      <a (click)="removePhoto()">
+                        <small>Remove Photo</small>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" class="form-control" id="fullName" name="fullName" #fullName="ngModel" [ngModel]='(profile$|async)?.val.full_name'
+                      required>
+                    <div *ngIf="fullName.invalid && (fullName.dirty || fullName.touched)" class="alert alert-danger">
+                      <div *ngIf="fullName.errors.required">
+                        Full Name is required.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="text" class="form-control" id="email" name="email" #email="ngModel" pattern="^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+                      [ngModel]='(profile$|async)?.val.email' required>
+                    <div *ngIf="email.invalid && (email.dirty || email.touched)" class="alert alert-danger">
+                      <div *ngIf="email.errors.required">
+                        Email is required.
+                      </div>
+                      <div *ngIf="email.errors.pattern">
+                        Please enter correct format. Example: foo@bar.com
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane" id="abt" [ngClass]="{active: abt}">
+            <form #aboutForm="ngForm">
+              <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" id="title" name="title" #title="ngModel" [ngModel]='(profile$|async)?.val.title' class="form-control"
+                  required>
+                <div *ngIf="title.invalid && (title.dirty || title.touched)" class="alert alert-danger">
+                  <div *ngIf="title.errors.required">
+                    Title is required.
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="aboutYou">About You</label>
+                <textarea type="text" id="aboutYou" name="aboutYou" #aboutYou="ngModel" [ngModel]='(profile$|async)?.val.about' class="form-control"
+                  required rows="4" minlength="10" maxlength="50"></textarea>
+                <div *ngIf="aboutYou.invalid && (aboutYou.dirty || aboutYou.touched)" class="alert alert-danger">
+                  <div *ngIf="aboutYou.errors.required">
+                    About You is required.
+                  </div>
+                  <div *ngIf="aboutYou.errors.minlength">
+                    About You must be more than 10 characters
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="tab-pane" id="noti" [ngClass]="{active: noti}">
+            <h3>Set up how you would like to be notified</h3>
+            <hr/>
+            <div class="form-group row">
+              <div class="col-md-10">
+                <label>Discussion</label>
+              </div>
+              <div class="col-md-2 text-right">
+                <input type="checkbox" id="discussion" (ngModelChange)="changeDiscuss($event)" [ngModel]="discussion">
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-md-10">
+                <label>Assignment</label>
+              </div>
+              <div class="col-md-2 text-right">
+                <input type="checkbox" id="assignment" (ngModelChange)="changeAssignment($event)" [ngModel]="assignment">
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-md-10">
+                <label>Meeting</label>
+              </div>
+              <div class="col-md-2 text-right">
+                <input type="checkbox" id="meeting" (ngModelChange)="changeMeeting($event)" [ngModel]="meeting">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" *ngIf="prof">
+        <button type="button" class="btn btn-secondary" (click)="profileModal.hide()">Close</button>
+        <button [disabled]="!profileForm.valid" type="button" class="btn btn-primary" (click)="profileSubmit(profileForm,profileModal)">Save changes</button>
+      </div>
+      <div class="modal-footer" *ngIf="abt">
+        <button type="button" class="btn btn-secondary" (click)="profileModal.hide()">Close</button>
+        <button [disabled]="!aboutForm.valid" type="button" class="btn btn-primary" (click)="aboutSubmit(aboutForm,profileModal)">Save changes</button>
+      </div>
+      <div class="modal-footer" *ngIf="noti">
+        <button type="button" class="btn btn-secondary" (click)="profileModal.hide()">Close</button>
+        <button type="button" class="btn btn-primary" (click)="notiSubmit(profileModal)">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div bsModal #createCourse="bs-modal" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">New Course</h5>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="success" class="alert alert-success">{{success}}</div>
+        <form #newCourse="ngForm">
+          <div class="form-group">
+            <label for="courseName">Course Name</label>
+            <input type="text" id="courseName" name="courseName" #courseName="ngModel" ngModel required class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="section">Section</label>
+            <input type="text" id="section" name="section" #section="ngModel" ngModel required class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea type="text" id="description" name="description" #description="ngModel" ngModel required class="form-control"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" id="location" name="location" #location="ngModel" ngModel required class="form-control">
+          </div>
+          <div class="row form-group">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="startDate">Start Date</label>
+                <input type="date" id="startDate" name="startDate" #startDate="ngModel" ngModel required class="form-control">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="endDate">End Date</label>
+                <input type="date" id="endDate" name="endDate" #endDate="ngModel" ngModel required class="form-control">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="courseLevel">Course level</label>
+            <div *ngFor="let l of level">
+              <input type="radio" name="courseLevel" id="courseLevel" ngModel [value]="l.id"> {{l.id}}
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="createCourse.hide()">Cancel</button>
+        <button [disabled]="!newCourse.valid" type="button" class="btn btn-primary" (click)="saveCourse(newCourse, createCourse)">Add Course</button>
+      </div>
+    </div>
+  </div>
+</div>

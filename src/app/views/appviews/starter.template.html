@@ -1,0 +1,137 @@
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-8">
+            <div *ngIf="success" class="alert alert-success">{{success}}</div>
+            <h2>
+                <strong>MY DASHBOARD</strong>
+            </h2>
+            <div class="social-feed-box">
+                <div class="social-comment">
+                    <div class="media-body">
+                        <form #announcement="ngForm">
+                            <textarea class="form-control" ngModel name="new" placeholder="Write comment..."></textarea>
+                        </form>
+                    </div>
+                </div>
+                <div class="row mlmr">
+                    <div class="col-lg-6">
+                        <div class="row">
+                            <div class="col-2">
+                                <label><input type="checkbox" disabled value=""> Public</label>
+                            </div>
+                            <div class="col-2">
+                                <input accept="image/*" type="file" (change)="changeFile($event)" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <select ngModel (change)="selectGroup($event.target.value)" class="form-control">
+                            <optgroup label="Group">
+                                <option *ngFor="let c of course | async" [value]="c.key">{{c.data.course_name}}</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">
+                        <button class="btn btn-info" (click)="newStory(announcement)">Share</button>
+                    </div>
+                </div>
+            </div>
+            <div class="social-feed-box" *ngFor="let d of dash | async">
+                <div class="social-avatar">
+                    <a class="pull-left">
+                        <img *ngIf="(user$ | async) as u" alt="image" class="img-circle" style="width: 42px; height:42px" src="{{u.image_url}}">
+                    </a>
+                    <div class="media-body">
+                        <a *ngIf="(user$ | async) as u">
+                            {{u.display_name}}
+                        </a>
+                        <small class="text-muted">{{d.data.created_on | date:'dd MM yyyy hh:mm A'}}</small>
+                    </div>
+                </div>
+                <div class="social-body">
+                    <p>
+                        {{d.data.description?d.data.description:''}}
+                        <p>
+                            <img src="{{d.data.image?d.data.image:''}}" alt="" class="img-responsive">
+                            <div class="btn-group">
+                                <button class="btn btn-white btn-xs">
+                                    <i class="fa fa-thumbs-up"></i> Like this!</button>
+                                <button class="btn btn-white btn-xs">
+                                    <i class="fa fa-comments"></i> Comment</button>
+                                <button class="btn btn-white btn-xs">
+                                    <i class="fa fa-share"></i> Share</button>
+                            </div>
+                </div>
+                <div class="social-footer">
+                    <div class="social-comment">
+                        <a href="" class="pull-left">
+                            <img alt="image" class="img-circle" style="width: 42px; height:42px" src="../../../assets/images/profile.jpg">
+                        </a>
+                        <div class="media-body">
+                            <a href="#">
+                                Andrew Williams
+                            </a>
+                            Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary
+                            of over 200 Latin words.
+                            <br/>
+                            <a href="#" class="small">
+                                <i class="fa fa-thumbs-up"></i> 26 Like this!</a> -
+                            <small class="text-muted">12.06.2014</small>
+                        </div>
+                    </div>
+
+                    <div class="social-comment">
+                        <a href="" class="pull-left">
+                            <img alt="image" class="img-circle" style="width: 42px; height:42px" src="../../../assets/images/profile.jpg">
+                        </a>
+                        <div class="media-body">
+                            <a href="#">
+                                Andrew Williams
+                            </a>
+                            Making this the first true generator on the Internet. It uses a dictionary of.
+                            <br/>
+                            <a href="#" class="small">
+                                <i class="fa fa-thumbs-up"></i> 11 Like this!</a> -
+                            <small class="text-muted">10.07.2014</small>
+                        </div>
+                    </div>
+
+                    <div class="social-comment">
+                        <a href="" class="pull-left">
+                            <img alt="image" class="img-circle" style="width: 42px; height:42px" src="../../../assets/images/profile.jpg">
+                        </a>
+                        <div class="media-body">
+                            <textarea class="form-control" placeholder="Write comment..."></textarea>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="ibox">
+                <div class="ibox-content">
+
+                    <div class="input-group">
+                        <input type="text" placeholder="Add new task. " class="input input-sm form-control">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-sm btn-white">
+                                <i class="fa fa-plus"></i> Add task</button>
+                        </span>
+                    </div>
+                    <ul class="sortable-list connectList agile-list">
+                        <li>
+                            Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary
+                            of over 200 Latin words.
+                            <div class="agile-detail">
+                                <i class="fa fa-clock-o"></i>
+                                <small class="text-muted">Today 4:21 pm - 12.06.2014</small>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

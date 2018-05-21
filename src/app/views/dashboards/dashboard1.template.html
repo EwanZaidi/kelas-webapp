@@ -1,0 +1,388 @@
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="ibox float-e-margins">
+                <div class="ibox-content mailbox-content">
+                    <div class="file-manager">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <img *ngIf="(profile$|async) as profile" alt="image" class="img-circle" style="width: 42px; height:42px" src="{{profile.image_url}}">
+                            </div>
+                            <div class="col-md-8">
+                                <h5 *ngIf="(courseDetail$ | async) as course">{{course.course_name}}</h5>
+                                <p *ngIf="(courseDetail$ | async) as course">
+                                    <small>@ {{course.course_tag}}</small>
+                                </p>
+                            </div>
+                        </div>
+                        <hr/>
+                        <ul class="folder-list m-b-md" style="padding: 0">
+                            <li>
+                                <a ui-sref="inbox" (click)="list('home')">
+                                    <i class="fa fa-home"></i> Home
+                                </a>
+                            </li>
+                            <li>
+                                <a ui-sref="inbox" (click)="list('discussion')">
+                                    <i class="fa fa-comments"></i> Discussion</a>
+                            </li>
+                            <li>
+                                <a ui-sref="inbox" (click)="list('assignment')">
+                                    <i class="fa fa-tasks"></i> Assignment</a>
+                            </li>
+                            <li>
+                                <a ui-sref="inbox" (click)="list('materials')">
+                                    <i class="fa fa-pencil"></i> Materials
+                                </a>
+                            </li>
+                            <li>
+                                <a ui-sref="inbox" (click)="list('grading')">
+                                    <i class="fa fa-graduation-cap"></i> Grading</a>
+                            </li>
+                            <li>
+                                <a ui-sref="inbox" (click)="list('classmates')">
+                                    <i class="fa fa-users"></i> Classmates</a>
+                            </li>
+                        </ul>
+                        <button class="btn btn-primary">Add people</button>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="home" class="col-lg-9 animated fadeInRight">
+            <div class="mail-box-header">
+
+                <form method="get" action="index.html" class="pull-right mail-search">
+                    <div class="input-group">
+                        <input type="text" class="form-control input-sm" name="search" placeholder="Search email">
+
+                        <div class="input-group-btn">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <h2>
+                    Home
+                </h2>
+                <div class="social-feed-box animated fadeInRight" *ngFor="let d of dashboard$ | async">
+                    <div class="social-avatar">
+                        <a class="pull-left">
+                            <img *ngIf="d.user$ | async as user" alt="image" class="img-circle" style="width: 42px; height:42px" src="{{user.data.image_url}}">
+                        </a>
+                        <div class="media-body">
+                            <a *ngIf="d.user$ | async as user">
+                                {{user.data.display_name}}
+                            </a>
+                            <small class="text-muted">{{d.data.created_on | date:'dd MM yyyy hh:mm A'}}</small>
+                        </div>
+                    </div>
+                    <div class="social-body">
+                        <p>
+                            {{d.data.description?d.data.description:''}}
+                            <p>
+                                <img src="{{d.data.image?d.data.image:''}}" alt="" class="img-responsive">
+                                <div class="btn-group">
+                                    <button class="btn btn-white btn-xs">
+                                        <i class="fa fa-thumbs-up"></i> Like this!</button>
+                                    <button class="btn btn-white btn-xs">
+                                        <i class="fa fa-comments"></i> Comment</button>
+                                    <button class="btn btn-white btn-xs">
+                                        <i class="fa fa-share"></i> Share</button>
+                                </div>
+                    </div>
+                    <div class="social-footer">
+                        <div class="social-comment">
+                            <a href="" class="pull-left">
+                                <img alt="image" class="img-circle" style="width: 42px; height:42px" src="../../../assets/images/profile.jpg">
+                            </a>
+                            <div class="media-body">
+                                <a href="#">
+                                    Andrew Williams
+                                </a>
+                                Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary
+                                of over 200 Latin words.
+                                <br/>
+                                <a href="#" class="small">
+                                    <i class="fa fa-thumbs-up"></i> 26 Like this!</a> -
+                                <small class="text-muted">12.06.2014</small>
+                            </div>
+                        </div>
+
+                        <div class="social-comment">
+                            <a href="" class="pull-left">
+                                <img alt="image" class="img-circle" style="width: 42px; height:42px" src="../../../assets/images/profile.jpg">
+                            </a>
+                            <div class="media-body">
+                                <a href="#">
+                                    Andrew Williams
+                                </a>
+                                Making this the first true generator on the Internet. It uses a dictionary of.
+                                <br/>
+                                <a href="#" class="small">
+                                    <i class="fa fa-thumbs-up"></i> 11 Like this!</a> -
+                                <small class="text-muted">10.07.2014</small>
+                            </div>
+                        </div>
+
+                        <div class="social-comment">
+                            <a href="" class="pull-left">
+                                <img alt="image" class="img-circle" style="width: 42px; height:42px" src="../../../assets/images/profile.jpg">
+                            </a>
+                            <div class="media-body">
+                                <textarea class="form-control" placeholder="Write comment..."></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+            <div class="mail-box">
+
+            </div>
+        </div>
+        <div *ngIf="discussion" class="col-lg-9 animated fadeInRight">
+            <div class="mail-box-header row">
+                <div class="col-md-10">
+                    <h2> Discussion</h2>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary pull-right" (click)="createDiscuss.show()">Create Discussion</button>
+                </div>
+            </div>
+            <div class="vote-item animated fadeInRight" *ngFor="let d of discuss|async">
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="vote-actions">
+                            <a>
+                                <i class="fa fa-chevron-up"> </i>
+                            </a>
+                            <div>32</div>
+                            <a>
+                                <i class="fa fa-chevron-down"> </i>
+                            </a>
+                        </div>
+                        <a (click)="disDetails(d.key)" class="vote-title">
+                            {{d.val.title}}
+                        </a>
+                        <div class="vote-info">
+                            <i class="fa fa-comments-o"></i>
+                            <a href="#">Comments (32)</a>
+                            <i class="fa fa-clock-o"></i>
+                            <a href="#">1 Hours ago</a>
+                            <i class="fa fa-user"></i>
+                            <a href="#">Andrew Williams</a>
+                        </div>
+                    </div>
+                    <div class="col-md-2 ">
+                        <div class="vote-icon">
+                            <i class="fa fa-css3"> </i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="assignment" class="col-lg-9 animated fadeInRight">
+            <div class="mail-box-header">
+
+                <form method="get" action="index.html" class="pull-right mail-search">
+                    <div class="input-group">
+                        <input type="text" class="form-control input-sm" name="search" placeholder="Search email">
+
+                        <div class="input-group-btn">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <h2>
+                    Assignment
+                </h2>
+            </div>
+            <div class="mail-box">
+                <table class="table table-hover table-mail">
+                    <tbody>
+                        <tr class="unread">
+                            <td class="check-mail">
+                                <input icheck type="checkbox" ng-model="main.checkOne">
+                            </td>
+                            <td class="mail-ontact">
+                                <a ui-sref="email_view">Anna Smith</a>
+                            </td>
+                            <td class="mail-subject">
+                                <a ui-sref="email_view">Lorem ipsum dolor noretek imit set.</a>
+                            </td>
+                            <td class="">
+                                <i class="fa fa-paperclip"></i>
+                            </td>
+                            <td class="text-right mail-date">6.10 AM</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div *ngIf="materials" class="col-lg-9 animated fadeInRight">
+            <div class="mail-box-header">
+
+                <form method="get" action="index.html" class="pull-right mail-search">
+                    <div class="input-group">
+                        <input type="text" class="form-control input-sm" name="search" placeholder="Search email">
+
+                        <div class="input-group-btn">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <h2>
+                    Materials
+                </h2>
+            </div>
+            <div class="mail-box">
+
+            </div>
+        </div>
+        <div *ngIf="grading" class="col-lg-9 animated fadeInRight">
+            <div class="mail-box-header">
+
+                <form method="get" action="index.html" class="pull-right mail-search">
+                    <div class="input-group">
+                        <input type="text" class="form-control input-sm" name="search" placeholder="Search email">
+
+                        <div class="input-group-btn">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <h2>
+                    Grading
+                </h2>
+            </div>
+            <div class="mail-box">
+
+            </div>
+        </div>
+        <div *ngIf="classmates" class="col-lg-9 animated fadeInRight">
+            <div class="mail-box-header">
+
+                <form method="get" action="index.html" class="pull-right mail-search">
+                    <div class="input-group">
+                        <input type="text" class="form-control input-sm" name="search" placeholder="Search email">
+
+                        <div class="input-group-btn">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <h2>
+                    Classmates
+                </h2>
+            </div>
+            <div class="mail-box">
+
+            </div>
+        </div>
+        <div *ngIf="dislist" class="col-lg-9 animated fadeInRight">
+            <div class="mail-box-header">
+                <h3 (click)="toDisList()" style="cursor: pointer">
+                    <i class="fa fa-chevron-left"></i> Back to discussion list
+                </h3>
+                <hr/>
+                <div class="mail-tools tooltip-demo m-t-md">
+                    <h3 *ngIf="(disDetail$|async) as d">
+                        {{d.title}}
+                    </h3>
+                    <h5>
+                        <span *ngIf="(disDetail$|async) as d" class="pull-right font-normal">{{d.created_on | date: 'hh:mm a dd MMM yyyy'}}</span>
+                        <span *ngIf="(createdBy|async) as c" class="font-normal">
+                            <img alt="image" class="img-circle" style="width: 35px; height:35px" src="{{c.image_url}}"> {{c.full_name}}</span>
+                    </h5>
+                </div>
+            </div>
+            <div class="mail-box">
+
+
+                <div class="mail-body" *ngIf="(disDetail$|async) as d">
+                    <p>
+                        {{d.description}}
+                    </p>
+                    <img src="{{d.image}}" class="img-responsive">
+                </div>
+                <hr/>
+
+                <div class="clearfix"></div>
+                <div class="social-footer">
+                    <div *ngFor="let c of comments | async" class="social-comment">
+                        <a href="" class="pull-left">
+                            <img alt="image" class="img-circle" style="width: 42px; height:42px" src="{{c.val.image}}">
+                        </a>
+                        <div class="media-body">
+                            <a>
+                                {{c.val.display_name}}
+                            </a>
+                            {{c.val.comment}}
+                            <br/>
+                            <a (click)="like(c.key)" class="small">
+                                <i class="fa fa-thumbs-up"></i> {{c.val.likes}} Like this!</a> -
+                            <small class="text-muted">{{c.val.created_on | date:'hh:mm a dd MMM yyyy'}}</small>
+                        </div>
+                    </div>
+
+                    <div class="social-comment">
+                        <a href="" class="pull-left">
+                            <img *ngIf="(profile$|async) as profile" alt="image" class="img-circle" style="width: 42px; height:42px" src="{{profile.image_url}}">
+                        </a>
+                        <div class="media-body">
+                            <form #commentForm="ngForm">
+                                <textarea class="form-control" name="comment" id="comment" ngModel placeholder="Write comment..." (keydown.enter)="onKeydown(commentForm)"></textarea>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #createDiscuss="bs-modal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Discusion</h5>
+            </div>
+            <div class="modal-body">
+                <form #newDiscuss="ngForm">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" id="title" name="title" #title="ngModel" ngModel required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea #desc type="text" id="description" name="description" #description="ngModel" ngModel required class="form-control"
+                            rows="4"></textarea>
+                    </div>
+                </form>
+                <div class="row form-group">
+                    <div class="col-md-5 text-left">
+                        <input accept="image/*" type="file" (change)="changeFile($event)" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="createDiscuss.hide()">Cancel</button>
+                <button [disabled]="!newDiscuss.valid" type="button" class="btn btn-primary" (click)="create(newDiscuss, createDiscuss)">Add Discussion</button>
+            </div>
+        </div>
+    </div>
+</div>
