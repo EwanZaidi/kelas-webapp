@@ -9,11 +9,29 @@ export class CommentsService {
   discussion_id: any;
   uid: any;
 
+  comment_id : any;
+
   constructor(private db: AngularFireDatabase) { }
 
   getId(key, uid){
     this.discussion_id = key;
     this.uid = uid; 
+  }
+
+  getCommentId(key, uid){
+    this.comment_id = key;
+    this.uid = uid;
+  }
+
+  newActivityComments(coment){
+    firebase.database().ref().child('/comments/'+this.comment_id+'/comment_list').push({
+      created_by: this.uid,
+      created_on: firebase.database.ServerValue.TIMESTAMP,
+      comment: coment,
+      likes: 0,
+    }).then((success)=> {
+      console.log(success)
+    })
   }
 
   newComments(coment){
@@ -24,6 +42,24 @@ export class CommentsService {
       likes: 0,
     }).then((success)=> {
       console.log(success)
+    })
+  }
+
+  getActivityComments(key) {
+    return this.db.list('/comments/'+key+'/comment_list').snapshotChanges().map(x => {
+      return x.map(y => {
+        let val = y.payload.val();
+        let key = y.payload.key;
+        let a = this.db.object('users/'+val.created_by);
+        let b : Observable<any> = a.valueChanges();
+
+        b.subscribe(x => {
+          val.display_name = x.display_name;
+          val.image = x.image_url;
+        })
+
+        return {val,key}
+      })
     })
   }
 

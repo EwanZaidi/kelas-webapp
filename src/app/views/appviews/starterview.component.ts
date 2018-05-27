@@ -1,4 +1,5 @@
-import { Component, OnDestroy, OnInit, } from '@angular/core';
+import { CommentsService } from '../../service/comments.service';
+import { Component, OnDestroy, OnInit, OnChanges } from '@angular/core';
 import { AngularFireDatabase, AngularFireObject, AngularFireList } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Observable } from 'rxjs/Observable';
@@ -10,7 +11,7 @@ import { DashboardService } from '../../service/dashboard.service';
   selector: 'starter',
   templateUrl: 'starter.template.html'
 })
-export class StarterViewComponent implements OnDestroy, OnInit {
+export class StarterViewComponent implements OnDestroy, OnInit, OnChanges{
 
   public nav: any;
   user_id: any;
@@ -29,9 +30,20 @@ export class StarterViewComponent implements OnDestroy, OnInit {
 
   file:any;
 
+  edit_success;
+  delete_success;
+
+  edit_activity: Boolean = false;
+  delete_activity: Boolean = false;
+
   success = null;
 
-  constructor(private db: AngularFireDatabase, private afAuth: AngularFireAuth, private dbSvc: DashboardService) {
+  selected_activity : Observable<any>;
+
+  comments : Observable<any>;
+
+
+  constructor(private cmt: CommentsService, private db: AngularFireDatabase, private afAuth: AngularFireAuth, private dbSvc: DashboardService) {
     this.nav = document.querySelector('nav.navbar');
 
     this.afAuth.authState.subscribe((auth) => {
@@ -52,13 +64,15 @@ export class StarterViewComponent implements OnDestroy, OnInit {
         });
 
         this.dashboard = this.db.list('dashboard/', ref => ref.orderByChild('created_by').equalTo(auth.uid));
-        this.dash = this.dashboard.snapshotChanges().map((d) => {
+        this.dash = this.dashboard.snapshotChanges().map((d) => { 
           return d.map(db => {
             const data = db.payload.val();
             const key = db.payload.key;
 
-            return {data,key}
-          })
+            const comments = this.cmt.getActivityComments(key);
+
+            return {data,key, comments};
+          }).reverse();
         })
       }
     })
@@ -97,21 +111,97 @@ export class StarterViewComponent implements OnDestroy, OnInit {
     //     this.success = null;
     //   },3000)
     // })
-    if(this.file != null){
+    if (this.file != null) {
       this.dbSvc.dashboardWithFile(this.file, form.value.new, this.key, this.user_id);
-    }else{
+    }else {
       this.dbSvc.dashboardNoFile(form.value.new, this.key, this.user_id);
     }
-    
     setTimeout(() => {
-      this.file == null;
-      this.key == null;
+      this.file = null;
+      this.key = null;
       form.reset();
-    },5000)
+    }, 5000 );
   }
 
-  changeFile(events){
+  changeFile(events) {
     this.file = events.target.files;
+  }
+
+  editModal(key, modal) {
+    this.edit_activity = true;
+    this.selected_activity = this.db.object('dashboard/' + key).snapshotChanges().map((s) => {
+      const data = s.payload.val();
+      const key = s.key;
+
+      return {data, key};
+    });
+
+    modal.show();
+  }
+
+  deleteModal(key, modal) {
+    this.delete_activity = true;
+    this.selected_activity = this.db.object('dashboard/' + key).snapshotChanges().map((s) => {
+      const data = s.payload.val();
+      const key = s.key;
+
+      return {data, key};
+    });
+
+    modal.show();
+  }
+
+  edit(form, key, modal) {
+    firebase.database().ref('dashboard/' + key).update({
+      description: form.value.desc
+    }).then(() => {
+      this.edit_activity = false;
+      // this.sortAgain();
+      modal.hide();
+    }).then(() => {
+      document.body.scrollTop = document.documentElement.scrollTop = 0;
+      this.edit_success = 'Your activity has been successfully updated';
+      setTimeout(() => {
+        this.edit_success = null;
+      }, 3000);
+    });
+  }
+
+  delete(key, modal) {
+    firebase.database().ref('dashboard/' + key).remove().then(() => {
+      this.delete_activity = false;
+      // this.sortAgain();
+      modal.hide();
+    }).then(() => {
+      document.body.scrollTop = document.documentElement.scrollTop = 0;
+      this.delete_success = 'Your activity has been successfully removed';
+      setTimeout(() => {
+        this.delete_success = null;
+      }, 3000);
+    });
+  }
+
+  ngOnChanges() {}
+
+  sortAgain() {
+    // this.dashboard = this.db.list('dashboard/', ref => ref.orderByChild('created_by').equalTo(this.user_id));
+    // this.dash = this.dashboard.snapshotChanges().map((d) => { 
+    //   d.reverse();
+    //   return d.map(db => {
+    //     const data = db.payload.val();
+    //     const key = db.payload.key;
+
+    //     return {data, key};
+    //   });
+    // });
+  }
+
+  addComment(form, key) {
+    this.cmt.getCommentId(key, this.user_id);
+    this.cmt.newActivityComments(form.value.comment);
+    setTimeout(() => {
+      form.reset();
+    }, 500);
   }
 
 

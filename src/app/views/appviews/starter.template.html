@@ -2,8 +2,10 @@
     <div class="row">
         <div class="col-lg-8">
             <div *ngIf="success" class="alert alert-success">{{success}}</div>
+            <div *ngIf="edit_success" class="alert alert-success">{{edit_success}}</div>
+            <div *ngIf="delete_success" class="alert alert-success">{{delete_success}}</div>
             <h2>
-                <strong>MY DASHBOARD</strong>
+                <strong>RECENT ACTIVITY</strong>
             </h2>
             <div class="social-feed-box">
                 <div class="social-comment">
@@ -45,7 +47,7 @@
                         <a *ngIf="(user$ | async) as u">
                             {{u.display_name}}
                         </a>
-                        <small class="text-muted">{{d.data.created_on | date:'dd MM yyyy hh:mm A'}}</small>
+                        <small class="text-muted">{{d.data.created_on | date:'dd MM yyyy hh:mm a'}}</small>
                     </div>
                 </div>
                 <div class="social-body">
@@ -60,48 +62,37 @@
                                     <i class="fa fa-comments"></i> Comment</button>
                                 <button class="btn btn-white btn-xs">
                                     <i class="fa fa-share"></i> Share</button>
+                                <button class="btn btn-white btn-xs" (click)="editModal(d.key, editActivity)">
+                                    <i class="fa fa-pencil"></i> Edit</button>
+                                <button class="btn btn-white btn-xs" (click)="deleteModal(d.key, editActivity)">
+                                    <i class="fa fa-trash-o"></i> Delete</button>
                             </div>
                 </div>
                 <div class="social-footer">
-                    <div class="social-comment">
+                    <div class="social-comment" *ngFor="let c of d.comments | async">
                         <a href="" class="pull-left">
-                            <img alt="image" class="img-circle" style="width: 42px; height:42px" src="../../../assets/images/profile.jpg">
+                            <img alt="image" class="img-circle" style="width: 42px; height:42px" src="{{c.val.image}}">
                         </a>
                         <div class="media-body">
                             <a href="#">
-                                Andrew Williams
+                               {{c.val.display_name}}
                             </a>
-                            Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary
-                            of over 200 Latin words.
+                            {{c.val.comment}}
                             <br/>
                             <a href="#" class="small">
                                 <i class="fa fa-thumbs-up"></i> 26 Like this!</a> -
-                            <small class="text-muted">12.06.2014</small>
+                            <small class="text-muted">{{c.val.created_on | date:'dd MM yyyy hh:mm a' }}</small>
                         </div>
                     </div>
 
                     <div class="social-comment">
                         <a href="" class="pull-left">
-                            <img alt="image" class="img-circle" style="width: 42px; height:42px" src="../../../assets/images/profile.jpg">
+                            <img *ngIf="(user$ | async) as u" alt="image" class="img-circle" style="width: 42px; height:42px" src="{{u.image_url}}">
                         </a>
                         <div class="media-body">
-                            <a href="#">
-                                Andrew Williams
-                            </a>
-                            Making this the first true generator on the Internet. It uses a dictionary of.
-                            <br/>
-                            <a href="#" class="small">
-                                <i class="fa fa-thumbs-up"></i> 11 Like this!</a> -
-                            <small class="text-muted">10.07.2014</small>
-                        </div>
-                    </div>
-
-                    <div class="social-comment">
-                        <a href="" class="pull-left">
-                            <img alt="image" class="img-circle" style="width: 42px; height:42px" src="../../../assets/images/profile.jpg">
-                        </a>
-                        <div class="media-body">
-                            <textarea class="form-control" placeholder="Write comment..."></textarea>
+                            <form #commentForm="ngForm">
+                                <textarea class="form-control" name="comment" id="comment" ngModel placeholder="Write comment..." (keydown.enter)="addComment(commentForm, d.key)"></textarea>
+                            </form>
                         </div>
                     </div>
 
@@ -131,6 +122,42 @@
                         </li>
                     </ul>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #editActivity="bs-modal" class="modal" tabindex="-1" role="dialog">
+    <div *ngIf="edit_activity" class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Activity</h5>
+            </div>
+            <div class="modal-body">
+                <form #editForm="ngForm">
+                    <div class="form-group">
+                        <label for="desc">Description</label>
+                        <textarea *ngIf="(selected_activity | async) as s"  rows="8" type="text" #title="ngModel" id="desc" name="desc" [(ngModel)]="s.data.description" required class="form-control"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="editActivity.hide()">Cancel</button>
+                <button *ngIf="(selected_activity | async) as s" [disabled]="!editForm.valid" type="button" class="btn btn-primary" (click)="edit(editForm, s.key, editActivity)">Edit</button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="delete_activity" class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Activity</h5>
+            </div>
+            <div class="modal-body">
+                <p *ngIf="(selected_activity | async) as s">Are you sure to delete <strong>{{s.data.description}}</strong> ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="editActivity.hide()">Cancel</button>
+                <button *ngIf="(selected_activity | async) as s" type="button" class="btn btn-danger" (click)="delete(s.key, editActivity)">Delete</button>
             </div>
         </div>
     </div>
