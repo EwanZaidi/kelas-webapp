@@ -53,6 +53,10 @@ export class RegisterComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
+  register(){
+    this.router.navigate(['/register']);
+  }
+
   role(event:any){
     if(event=='parents'){
       this.parents = true;

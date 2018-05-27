@@ -61,7 +61,7 @@ export class AuthService{
             })
             .catch(err => {
                 this.errorMessage = err;
-                return this.errorMessage;
+                return 'Invalid email & password, please try again';
                 // this.errorMessage = err;
                 // this.error = true;
                 // console.log('Something went wrong:', err.message);

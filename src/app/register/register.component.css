@@ -1,0 +1,16 @@
+.background {
+    background-size: cover;	
+    height: 100%;
+    background-image: url('../../assets/images/background.png');
+    background-repeat: no-repeat;
+    background-position: center;	
+}
+
+.white{
+    color: white;
+}
+
+.h {
+    margin-top:40px;
+    height: 100px;
+}
