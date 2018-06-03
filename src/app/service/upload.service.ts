@@ -15,6 +15,8 @@ export class UploadService {
   key:any;
   dis_id: any;
 
+  ckey: any;
+
   constructor(private db: AngularFireDatabase, private afAuth: AngularFireAuth) {
     this.afAuth.authState.subscribe(user => {
       if (user) this.userId = user.uid
@@ -50,7 +52,7 @@ export class UploadService {
     this.key = key;
     this.dis_id = dis_id;
     const storageRef = firebase.storage().ref();
-    const uploadTask = storageRef.child(`discussion/` + this.dis_id + `/discussion_list/` +this.key+`/${upload.file.name}`)
+    const uploadTask = storageRef.child(`discussion/${this.dis_id}/discussion_list/${this.key}/${upload.file.name}`)
       .put(upload.file);
 
     uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
@@ -69,8 +71,45 @@ export class UploadService {
       });
   }
 
+  uploadMaterial(upload: Upload, c_key, uid){
+    this.userId = uid;
+    this.ckey = c_key;
+    const storageRef = firebase.storage().ref();
+    const uploadTask = storageRef.child(`materials/${c_key}/${upload.file.name}`).put(upload.file);
+
+    uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
+      (snapshot) => {
+        upload.progress = (uploadTask.snapshot.bytesTransferred / uploadTask.snapshot.totalBytes) * 100;
+        upload.display = Math.round(upload.progress);
+        let snap = snapshot as firebase.storage.UploadTaskSnapshot;
+      },
+
+      (error) => {
+        console.log(error);
+      },
+
+      (): any => {
+        uploadTask.snapshot.ref.getDownloadURL().then((u) => {
+          upload.url = u;
+        }).then(() => {
+          upload.name = upload.file.name; 
+          this.saveMaterial(upload);
+        })
+      }
+    )
+  }
+
   private saveFileData2(upload: Upload) {
     this.db.object(`discussion/` + this.dis_id +'/discussion_list/'+this.key).update({ image: upload.image_url })
+  }
+
+  private saveMaterial(upload: Upload) {
+    firebase.database().ref(`materials/${this.ckey}/`).push({
+      name: upload.name,
+      url: upload.url,
+      created_on: firebase.database.ServerValue.TIMESTAMP,
+      created_by: this.userId
+    })
   }
 
 }

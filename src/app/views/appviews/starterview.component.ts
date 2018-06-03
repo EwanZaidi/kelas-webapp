@@ -1,5 +1,5 @@
 import { CommentsService } from '../../service/comments.service';
-import { Component, OnDestroy, OnInit, OnChanges } from '@angular/core';
+import { Component, OnDestroy, OnInit, OnChanges, ViewChild } from '@angular/core';
 import { AngularFireDatabase, AngularFireObject, AngularFireList } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Observable } from 'rxjs/Observable';
@@ -11,7 +11,10 @@ import { DashboardService } from '../../service/dashboard.service';
   selector: 'starter',
   templateUrl: 'starter.template.html'
 })
+
 export class StarterViewComponent implements OnDestroy, OnInit, OnChanges{
+
+  @ViewChild('myInput') myVariable: any;
 
   public nav: any;
   user_id: any;
@@ -119,6 +122,7 @@ export class StarterViewComponent implements OnDestroy, OnInit, OnChanges{
     setTimeout(() => {
       this.file = null;
       this.key = null;
+      this.myVariable.nativeElement.value = '';
       form.reset();
     }, 5000 );
   }

@@ -5,6 +5,8 @@ import { HttpModule } from '@angular/http';
 import {RouterModule} from "@angular/router";
 import {LocationStrategy, HashLocationStrategy} from '@angular/common';
 
+import { PopoverModule } from 'ngx-bootstrap/popover';
+
 import {ROUTES} from "./app.routes";
 import { AppComponent } from './app.component';
 
@@ -77,6 +79,7 @@ import { DashboardService } from './service/dashboard.service';
     AngularFireDatabaseModule,
     BsDropdownModule.forRoot(),
     ModalModule.forRoot(),
+    PopoverModule.forRoot()
   ],
   providers: [AuthService, AuthGuard, UploadService, DiscussionService, CommentsService, DashboardService],
   bootstrap: [AppComponent],

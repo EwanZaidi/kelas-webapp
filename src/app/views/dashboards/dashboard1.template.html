@@ -26,25 +26,25 @@
                                 <a ui-sref="inbox" (click)="list('discussion')">
                                     <i class="fa fa-comments"></i> Discussion</a>
                             </li>
-                            <li>
+                            <!-- <li>
                                 <a ui-sref="inbox" (click)="list('assignment')">
                                     <i class="fa fa-tasks"></i> Assignment</a>
-                            </li>
+                            </li> -->
                             <li>
                                 <a ui-sref="inbox" (click)="list('materials')">
                                     <i class="fa fa-pencil"></i> Materials
                                 </a>
                             </li>
-                            <li>
+                            <!-- <li>
                                 <a ui-sref="inbox" (click)="list('grading')">
                                     <i class="fa fa-graduation-cap"></i> Grading</a>
-                            </li>
+                            </li> -->
                             <li>
                                 <a ui-sref="inbox" (click)="list('classmates')">
                                     <i class="fa fa-users"></i> Classmates</a>
                             </li>
                         </ul>
-                        <button class="btn btn-primary">Add people</button>
+                        <button class="btn btn-primary" (click)="addPeople(createDiscuss)">Add people</button>
                         <div class="clearfix"></div>
                     </div>
                 </div>
@@ -145,12 +145,14 @@
             </div>
         </div>
         <div *ngIf="discussion" class="col-lg-9 animated fadeInRight">
-            <div class="mail-box-header row">
-                <div class="col-md-10">
-                    <h2> Discussion</h2>
-                </div>
-                <div class="col-md-2">
-                    <button class="btn btn-primary pull-right" (click)="createDiscuss.show()">Create Discussion</button>
+            <div class="mail-box-header">
+                <div class="row">
+                    <div class="col-md-10">
+                        <h2> Discussion</h2>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary pull-right" (click)="createDiscussion(createDiscuss)">Create Discussion</button>
+                    </div>
                 </div>
             </div>
             <div class="vote-item animated fadeInRight" *ngFor="let d of discuss|async">
@@ -227,24 +229,70 @@
         </div>
         <div *ngIf="materials" class="col-lg-9 animated fadeInRight">
             <div class="mail-box-header">
+                <div class="row">
+                    <div class="col-md-10">
+                        <h2> Materials</h2>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary pull-right" (click)="addMaterial(createDiscuss)">Add Material</button>
+                    </div>
+                </div>
+            </div>
+            <div class="alert alert-success" *ngIf="(uploading?.display) == 100">Your document has been uploaded</div>
+            <div class="mail-box">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="ibox">
+                            <div class="ibox-content">
 
-                <form method="get" action="index.html" class="pull-right mail-search">
-                    <div class="input-group">
-                        <input type="text" class="form-control input-sm" name="search" placeholder="Search email">
+                                <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="15">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>Upload Time</th>
+                                            <!-- <th>Family Members</th> -->
+                                            <th class="text-right">Actions</th>
 
-                        <div class="input-group-btn">
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                Search
-                            </button>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let m of material$ | async; let i = index">
+                                            <td>
+                                                {{i + 1}}
+                                            </td>
+                                            <td>
+                                                <a href="{{m.data.url}}">
+                                                    {{m.data.name}}
+                                                </a>
+                                                - <small *ngIf="(m.user$ | async) as u">{{u.data.display_name}}</small>
+                                            </td>
+                                            <td>
+                                                {{m.data.created_on | date: 'dd/MM/yyyy hh:mm a'}}
+                                            </td>
+                                            <!-- <td>
+                                            FAMILY
+                                        </td> -->
+                                            <td class="text-right">
+                                                <div class="btn-group">
+                                                    <button class="btn-white btn btn-sm" [popover]="actionTemplate">
+                                                        <i class="fa fa-ellipsis-h"></i>
+                                                    </button>
+                                                </div>
+                                                <ng-template #actionTemplate>
+                                                    <button class="btn white btn btn-xs" (click)="deleteMaterial(m.key, createDiscuss)">
+                                                        <i class="fa fa-trash-o"></i>
+                                                    </button>
+                                                </ng-template>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
                         </div>
                     </div>
-                </form>
-                <h2>
-                    Materials
-                </h2>
-            </div>
-            <div class="mail-box">
-
+                </div>
             </div>
         </div>
         <div *ngIf="grading" class="col-lg-9 animated fadeInRight">
@@ -287,8 +335,61 @@
                     Classmates
                 </h2>
             </div>
+            <div class="alert alert-success" *ngIf="success">{{success}}</div>
             <div class="mail-box">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="ibox">
+                            <div class="ibox-content">
 
+                                <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="15">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>Date Joined</th>
+                                            <!-- <th>Family Members</th> -->
+                                            <th class="text-right">Actions</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let c of classMates | async; let i = index">
+                                            <td>
+                                                {{i + 1}}
+                                            </td>
+                                            <td>
+                                                {{c.data.name}}
+                                            </td>
+                                            <td>
+                                                {{c.data.join_date | date: 'dd MM yyyy'}}
+                                            </td>
+                                            <!-- <td>
+                                            FAMILY
+                                        </td> -->
+                                            <td class="text-right">
+                                                <div class="btn-group">
+                                                    <button class="btn-white btn btn-sm" [popover]="actionTemplate">
+                                                        <i class="fa fa-ellipsis-h"></i>
+                                                    </button>
+                                                </div>
+                                                <ng-template #actionTemplate>
+                                                    <button class="btn white btn btn-xs" (click)="deletePeople(c.key, createDiscuss)">
+                                                        <i class="fa fa-trash-o"></i>
+                                                    </button>
+                                                    <button class="btn white btn btn-xs" (click)="editPeople(c.key, createDiscuss)">
+                                                        <i class="fa fa-pencil"></i>
+                                                    </button>
+                                                </ng-template>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div *ngIf="dislist" class="col-lg-9 animated fadeInRight">
@@ -356,7 +457,7 @@
 </div>
 
 <div bsModal #createDiscuss="bs-modal" class="modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
+    <div *ngIf="nDiscuss" class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">New Discusion</h5>
@@ -380,8 +481,107 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="createDiscuss.hide()">Cancel</button>
+                <button type="button" class="btn btn-secondary" (click)="closeModal(createDiscuss)">Cancel</button>
                 <button [disabled]="!newDiscuss.valid" type="button" class="btn btn-primary" (click)="create(newDiscuss, createDiscuss)">Add Discussion</button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="nMaterial" class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Material</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row form-group">
+                    <div class="col-md-5 text-left">
+                        <input accept=".pdf,.xls,.xlxs" type="file" (change)="addDocument($event)" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(createDiscuss)">Cancel</button>
+                <button type="button" class="btn btn-primary" (click)="createMaterial(createDiscuss)">Add Material</button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="nAddPeople" class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add People</h5>
+            </div>
+            <div class="modal-body">
+                <form #newPeople="ngForm">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" #name="ngModel" name="name" placeholder="Enter Name" ngModel required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" #email="ngModel" name="email" placeholder="Enter Email" ngModel required class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(createDiscuss)">Cancel</button>
+                <button [disabled]="!newPeople.valid" type="button" class="btn btn-primary" (click)="createClassmates(newPeople, createDiscuss)">Add People</button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="ePeople" class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Classmates</h5>
+            </div>
+            <div class="modal-body">
+                <form #editPeople="ngForm">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input *ngIf="(selectedPeople | async) as s" type="text" id="title" #title="ngModel" name="title" placeholder="Enter Title"
+                            [(ngModel)]="s.title" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input *ngIf="(selectedPeople | async) as s" type="text" id="name" #name="ngModel" name="name" placeholder="Enter Name" [(ngModel)]="s.name"
+                            required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input *ngIf="(selectedPeople | async) as s" type="email" id="email" #email="ngModel" name="email" placeholder="Enter Email"
+                            [(ngModel)]="s.email" required class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(createDiscuss)">Cancel</button>
+                <button [disabled]="!editPeople.valid" type="button" class="btn btn-primary" (click)="confirmEdit(editPeople, createDiscuss)">Edit</button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="dPeople" class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Classmates</h5>
+            </div>
+            <div class="modal-body">
+                Are you sure to delete this user?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(createDiscuss)">Cancel</button>
+                <button type="button" class="btn btn-danger" (click)="confirmDelete(createDiscuss)">Delete</button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="dMaterial" class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Classmates</h5>
+            </div>
+            <div class="modal-body">
+                Are you sure to delete this material?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(createDiscuss)">Cancel</button>
+                <button type="button" class="btn btn-danger" (click)="confirmDeleteMaterial(createDiscuss)">Delete</button>
             </div>
         </div>
     </div>

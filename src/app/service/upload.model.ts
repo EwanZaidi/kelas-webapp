@@ -8,6 +8,8 @@ export class Upload {
     uploaded_on: any;
     display: any;
     count: number;
+    name: string;
+    url: String;
     
     constructor(file: File) {
         this.file = file;

@@ -4,14 +4,11 @@
             <div *ngIf="success" class="alert alert-success">{{success}}</div>
             <div *ngIf="edit_success" class="alert alert-success">{{edit_success}}</div>
             <div *ngIf="delete_success" class="alert alert-success">{{delete_success}}</div>
-            <h2>
-                <strong>RECENT ACTIVITY</strong>
-            </h2>
             <div class="social-feed-box">
                 <div class="social-comment">
                     <div class="media-body">
                         <form #announcement="ngForm">
-                            <textarea class="form-control" ngModel name="new" placeholder="Write comment..."></textarea>
+                            <textarea class="form-control" ngModel name="new" placeholder="Write comment..." required></textarea>
                         </form>
                     </div>
                 </div>
@@ -22,7 +19,7 @@
                                 <label><input type="checkbox" disabled value=""> Public</label>
                             </div>
                             <div class="col-2">
-                                <input accept="image/*" type="file" (change)="changeFile($event)" />
+                                <input #myInput accept="image/*" type="file" (change)="changeFile($event)"/>
                             </div>
                         </div>
                     </div>
@@ -34,7 +31,7 @@
                         </select>
                     </div>
                     <div class="col-lg-2">
-                        <button class="btn btn-info" (click)="newStory(announcement)">Share</button>
+                        <button [disabled]="!announcement.valid" class="btn btn-info" (click)="newStory(announcement)">Share</button>
                     </div>
                 </div>
             </div>
