@@ -27,6 +27,7 @@ export const ROUTES:Routes = [
     children: [
       {path: 'recent', component: StarterViewComponent, canActivate: [AuthGuard]},
       {path: 'courses/:id', component: Dashboard1Component, canActivate: [AuthGuard]},
+      {path: 'calendar', component: Dashboard2Component, canActivate: [AuthGuard]}
     ]
   },
   {

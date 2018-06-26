@@ -48,6 +48,31 @@ export class UploadService {
     this.db.object(`users/` + this.userId).update({ image_url: upload.image_url })
   }
 
+  uploadFile3(upload: Upload, key) {
+    const storageRef = firebase.storage().ref();
+    const uploadTask = storageRef.child(`/courses/course_list/${key}/${upload.file.name}`)
+      .put(upload.file);
+
+    uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
+
+      (snapshot) => {
+        let snap = snapshot as firebase.storage.UploadTaskSnapshot;
+      },
+
+      (error) => {
+        console.log(error);
+      },
+
+      (): any => {
+        upload.image_url = uploadTask.snapshot.downloadURL;
+        this.saveFileData3(upload, key)
+      });
+  }
+
+  private saveFileData3(upload: Upload, key) {
+    this.db.object(`/courses/course_list/${key}`).update({ image_url: upload.image_url })
+  }
+
   uploadFile2(upload: Upload, key, dis_id) {
     this.key = key;
     this.dis_id = dis_id;

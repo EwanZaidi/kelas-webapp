@@ -16,10 +16,11 @@
                     <div class="col-lg-6">
                         <div class="row">
                             <div class="col-2">
-                                <label><input type="checkbox" disabled value=""> Public</label>
+                                <label>
+                                    <input type="checkbox" disabled value=""> Public</label>
                             </div>
                             <div class="col-2">
-                                <input #myInput accept="image/*" type="file" (change)="changeFile($event)"/>
+                                <input #myInput accept="image/*" type="file" (change)="changeFile($event)" />
                             </div>
                         </div>
                     </div>
@@ -72,12 +73,14 @@
                         </a>
                         <div class="media-body">
                             <a href="#">
-                               {{c.val.display_name}}
+                                {{c.val.display_name}}
                             </a>
                             {{c.val.comment}}
                             <br/>
                             <a href="#" class="small">
-                                <i class="fa fa-thumbs-up"></i> 26 Like this!</a> -
+                                <i class="fa fa-thumbs-up"></i> 26 Like this!</a>
+                                <a class="small" (click)="deleteComment(c.key, d.key,commentModal)">
+                                    <i class="fa fa-trash-0" *ngIf="c.val.created_by === user_id"></i> Delete</a> -
                             <small class="text-muted">{{c.val.created_on | date:'dd MM yyyy hh:mm a' }}</small>
                         </div>
                     </div>
@@ -99,23 +102,32 @@
         </div>
         <div class="col-lg-4">
             <div class="ibox">
-                <div class="ibox-content">
+                <div class="ibox-content n-b">
 
                     <div class="input-group">
                         <input type="text" placeholder="Add new task. " class="input input-sm form-control">
                         <span class="input-group-btn">
-                            <button type="button" class="btn btn-sm btn-white">
+                            <button type="button" class="btn btn-sm btn-white" (click)="createdTask(addTask)">
                                 <i class="fa fa-plus"></i> Add task</button>
                         </span>
                     </div>
                     <ul class="sortable-list connectList agile-list">
-                        <li>
-                            Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary
-                            of over 200 Latin words.
+                        <li *ngFor="let t of task$ | async" [popover]="actionTemplate">
+                            <b>{{t.data.name}}</b>
+                            <br>
+                            <span *ngIf="t.data.description !== ''">{{t.data.description}}</span>
                             <div class="agile-detail">
                                 <i class="fa fa-clock-o"></i>
-                                <small class="text-muted">Today 4:21 pm - 12.06.2014</small>
+                                <small class="text-muted">{{t.data.moment}} - {{t.data.mydate | date : 'dd MM yyyy'}}</small>
                             </div>
+                            <ng-template #actionTemplate>
+                                <button class="btn white btn btn-xs" (click)="deleteTask(t.key, addTask)">
+                                    <i class="fa fa-trash-o"></i>
+                                </button>
+                                <button class="btn white btn btn-xs" (click)="editTask(t.key, addTask)">
+                                    <i class="fa fa-pencil"></i>
+                                </button>
+                            </ng-template>
                         </li>
                     </ul>
                 </div>
@@ -134,12 +146,13 @@
                 <form #editForm="ngForm">
                     <div class="form-group">
                         <label for="desc">Description</label>
-                        <textarea *ngIf="(selected_activity | async) as s"  rows="8" type="text" #title="ngModel" id="desc" name="desc" [(ngModel)]="s.data.description" required class="form-control"></textarea>
+                        <textarea *ngIf="(selected_activity | async) as s" rows="8" type="text" #title="ngModel" id="desc" name="desc" [(ngModel)]="s.data.description"
+                            required class="form-control"></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="editActivity.hide()">Cancel</button>
+                <button type="button" class="btn btn-secondary" (click)="closeModal(editActivity)">Cancel</button>
                 <button *ngIf="(selected_activity | async) as s" [disabled]="!editForm.valid" type="button" class="btn btn-primary" (click)="edit(editForm, s.key, editActivity)">Edit</button>
             </div>
         </div>
@@ -150,11 +163,101 @@
                 <h5 class="modal-title">Delete Activity</h5>
             </div>
             <div class="modal-body">
-                <p *ngIf="(selected_activity | async) as s">Are you sure to delete <strong>{{s.data.description}}</strong> ?</p>
+                <p *ngIf="(selected_activity | async) as s">Are you sure to delete
+                    <strong>{{s.data.description}}</strong> ?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="editActivity.hide()">Cancel</button>
+                <button type="button" class="btn btn-secondary" (click)="closeModal(editActivity)">Cancel</button>
                 <button *ngIf="(selected_activity | async) as s" type="button" class="btn btn-danger" (click)="delete(s.key, editActivity)">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #addTask="bs-modal" class="modal fade bd-example-modal-sm" role="dialog">
+    <div *ngIf="create_task" class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Task</h5>
+            </div>
+            <div class="modal-body">
+                <form #addTaskForm="ngForm">
+                    <div class="form-group">
+                        <label for="taskName">Task Name</label>
+                        <input type="text" id="taskName" class="form-control" name="name" placeholder="Task Name.." required ngModel>
+                    </div>
+                    <div class="form-group">
+                        <label for="desc">Description</label>
+                        <input type="text" id="desc" class="form-control" name="desc" placeholder="Description (optional)" ngModel>
+                    </div>
+                    <div class="form-group">
+                        <label for="desc">Date</label>
+                        <input type="text" placeholder="01-01-2018" name="date" class="form-control" bsDatepicker required ngModel [bsConfig]="{ dateInputFormat: 'DD-MM-YYYY' }">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(addTask)">Cancel</button>
+                <button [disabled]="!addTaskForm.valid" type="button" class="btn btn-primary" (click)="addedTask(addTaskForm, addTask)">New Task</button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="edit_task" class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Task</h5>
+            </div>
+            <div class="modal-body">
+                <form #editTaskForm="ngForm">
+                    <div class="form-group">
+                        <label for="taskName">Task Name</label>
+                        <input *ngIf="(selected_task | async) as s" type="text" id="taskName" class="form-control" name="name" placeholder="Task Name.." required [(ngModel)]="s.data.name">
+                    </div>
+                    <div class="form-group">
+                        <label for="desc">Description</label>
+                        <input *ngIf="(selected_task | async) as s" type="text" id="desc" class="form-control" name="desc" placeholder="Description (optional)" [(ngModel)]="s.data.description">
+                    </div>
+                    <div class="form-group">
+                        <label for="desc">Date</label>
+                        <input *ngIf="(selected_task | async) as s" type="text" placeholder="01-01-2018" name="date" class="form-control" bsDatepicker required [bsConfig]="{ dateInputFormat: 'DD-MM-YYYY' }" [(ngModel)]="s.data.mydate">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(addTask)">Cancel</button>
+                <button [disabled]="!editTaskForm.valid" type="button" class="btn btn-primary" (click)="editedTask(editTaskForm,addTask)">Edit</button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="delete_task" class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Task</h5>
+            </div>
+            <div class="modal-body">
+                <p *ngIf="(selected_task | async) as s">Are you sure to delete
+                    <strong>{{s.name}}</strong> ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(addTask)">Cancel</button>
+                <button type="button" class="btn btn-danger" (click)="deletedTask(addTask)">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #commentModal="bs-modal" class="modal" tabindex="-1" role="dialog">
+    <div *ngIf="delete_comment" class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Comment</h5>
+            </div>
+            <div class="modal-body">
+                <p *ngIf="(selected_activity | async) as s">Are you sure to delete <strong>{{s.data.comment}}</strong> ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(commentModal)">Cancel</button>
+                <button *ngIf="(selected_activity | async) as s" type="button" class="btn btn-danger" (click)="deleteCmt(s.key, commentModal)">Delete</button>
             </div>
         </div>
     </div>

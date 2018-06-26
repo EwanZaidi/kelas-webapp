@@ -6,13 +6,27 @@
                     <div class="file-manager">
                         <div class="row">
                             <div class="col-md-4">
-                                <img *ngIf="(profile$|async) as profile" alt="image" class="img-circle" style="width: 42px; height:42px" src="{{profile.image_url}}">
+                                <img *ngIf="(courseDetail$ | async) as course" alt="image" class="img-circle" style="width: 42px; height:42px; cursor: pointer"
+                                    src="{{course.data.image_url}}" (click)="photoModal.show()">
                             </div>
-                            <div class="col-md-8">
-                                <h5 *ngIf="(courseDetail$ | async) as course">{{course.course_name}}</h5>
+                            <div class="col-md-6">
+                                <h5 *ngIf="(courseDetail$ | async) as course">{{course.data.course_name}}</h5>
                                 <p *ngIf="(courseDetail$ | async) as course">
-                                    <small>@ {{course.course_tag}}</small>
+                                    <small>@ {{course.data.course_tag}}</small>
                                 </p>
+                            </div>
+                            <div *ngIf="(courseDetail$ | async) as course" class="col-md-2">
+                                <button *ngIf="userId === course.data.created_by" class="btn-white btn btn-sm" [popover]="courseTemplate">
+                                    <i class="fa fa-ellipsis-h"></i>
+                                </button>
+                                <ng-template #courseTemplate>
+                                    <button class="btn white btn btn-xs" (click)="deleteCourse(courseModal)">
+                                        <i class="fa fa-trash-o"></i>
+                                    </button>
+                                    <button class="btn white btn btn-xs" (click)="editCourse(courseModal)">
+                                        <i class="fa fa-pencil"></i>
+                                    </button>
+                                </ng-template>
                             </div>
                         </div>
                         <hr/>
@@ -51,94 +65,86 @@
             </div>
         </div>
         <div *ngIf="home" class="col-lg-9 animated fadeInRight">
-            <div class="mail-box-header">
 
-                <form method="get" action="index.html" class="pull-right mail-search">
-                    <div class="input-group">
-                        <input type="text" class="form-control input-sm" name="search" placeholder="Search email">
+            <form method="get" action="index.html" class="pull-right mail-search">
+                <div class="input-group">
+                    <input type="text" class="form-control input-sm" name="search" placeholder="Search email">
 
-                        <div class="input-group-btn">
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                Search
-                            </button>
+                    <div class="input-group-btn">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <h2>
+                Trending Discussion
+            </h2>
+            <div class="alert alert-success" *ngIf="success">{{success}}</div>
+            <div class="social-feed-box animated fadeInRight" *ngFor="let d of dashboard$ | async">
+                <div class="social-avatar">
+                    <a class="pull-left">
+                        <img *ngIf="d.user$ | async as user" alt="image" class="img-circle" style="width: 42px; height:42px" src="{{user.data.image_url}}">
+                    </a>
+                    <div class="media-body">
+                        <a *ngIf="d.user$ | async as user">
+                            {{user.data.display_name}}
+                        </a>
+                        <small class="text-muted">{{d.data.created_on | date:'dd MM yyyy hh:mm a'}}</small>
+                    </div>
+                </div>
+                <div class="social-body">
+                    <p>
+                        {{d.data.description?d.data.description:''}}
+                        <p>
+                            <img src="{{d.data.image?d.data.image:''}}" alt="" class="img-responsive">
+                            <div class="btn-group">
+                                <button class="btn btn-white btn-xs">
+                                    <i class="fa fa-thumbs-up"></i> Like this!</button>
+                                <button class="btn btn-white btn-xs">
+                                    <i class="fa fa-comments"></i> Comment</button>
+                                <button class="btn btn-white btn-xs">
+                                    <i class="fa fa-share"></i> Share</button>
+                                <button class="btn btn-white btn-xs" (click)="editModal(d.key, editActivity)">
+                                    <i class="fa fa-pencil"></i> Edit</button>
+                                <button class="btn btn-white btn-xs" (click)="deleteModal(d.key, editActivity)">
+                                    <i class="fa fa-trash-o"></i> Delete</button>
+                            </div>
+                </div>
+                <div class="social-footer">
+                    <div>
+                        <div class="social-comment" *ngFor="let c of d.comments | async">
+                            <a href="" class="pull-left">
+                                <img alt="image" class="img-circle" style="width: 42px; height:42px" src="{{c.val.image}}">
+                            </a>
+                            <div class="media-body">
+                                <a href="#">
+                                    {{c.val.display_name}}
+                                </a>
+                                {{c.val.comment}}
+                                <br/>
+                                <a class="small">
+                                    <i class="fa fa-thumbs-up"></i> 26 Like this!</a>
+                                <a class="small" (click)="deleteComment(c.key, d.key,editActivity)">
+                                    <i class="fa fa-trash-0" *ngIf="c.val.created_by === userId"></i> Delete</a> -
+                                <small class="text-muted">{{c.val.created_on | date:'dd MM yyyy hh:mm a' }}</small>
+                            </div>
                         </div>
                     </div>
-                </form>
-                <h2>
-                    Home
-                </h2>
-                <div class="social-feed-box animated fadeInRight" *ngFor="let d of dashboard$ | async">
-                    <div class="social-avatar">
-                        <a class="pull-left">
-                            <img *ngIf="d.user$ | async as user" alt="image" class="img-circle" style="width: 42px; height:42px" src="{{user.data.image_url}}">
+
+                    <div class="social-comment">
+                        <a href="" class="pull-left">
+                            <img *ngIf="(d.user$|async) as u" alt="image" class="img-circle" style="width: 42px; height:42px" src="{{u.data.image_url}}">
                         </a>
                         <div class="media-body">
-                            <a *ngIf="d.user$ | async as user">
-                                {{user.data.display_name}}
-                            </a>
-                            <small class="text-muted">{{d.data.created_on | date:'dd MM yyyy hh:mm A'}}</small>
+                            <form #commentForm="ngForm">
+                                <textarea class="form-control" name="comment" id="comment" ngModel placeholder="Write comment..." (keydown.enter)="addComment(commentForm, d.key)"></textarea>
+                            </form>
                         </div>
-                    </div>
-                    <div class="social-body">
-                        <p>
-                            {{d.data.description?d.data.description:''}}
-                            <p>
-                                <img src="{{d.data.image?d.data.image:''}}" alt="" class="img-responsive">
-                                <div class="btn-group">
-                                    <button class="btn btn-white btn-xs">
-                                        <i class="fa fa-thumbs-up"></i> Like this!</button>
-                                    <button class="btn btn-white btn-xs">
-                                        <i class="fa fa-comments"></i> Comment</button>
-                                    <button class="btn btn-white btn-xs">
-                                        <i class="fa fa-share"></i> Share</button>
-                                </div>
-                    </div>
-                    <div class="social-footer">
-                        <div class="social-comment">
-                            <a href="" class="pull-left">
-                                <img alt="image" class="img-circle" style="width: 42px; height:42px" src="../../../assets/images/profile.jpg">
-                            </a>
-                            <div class="media-body">
-                                <a href="#">
-                                    Andrew Williams
-                                </a>
-                                Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary
-                                of over 200 Latin words.
-                                <br/>
-                                <a href="#" class="small">
-                                    <i class="fa fa-thumbs-up"></i> 26 Like this!</a> -
-                                <small class="text-muted">12.06.2014</small>
-                            </div>
-                        </div>
-
-                        <div class="social-comment">
-                            <a href="" class="pull-left">
-                                <img alt="image" class="img-circle" style="width: 42px; height:42px" src="../../../assets/images/profile.jpg">
-                            </a>
-                            <div class="media-body">
-                                <a href="#">
-                                    Andrew Williams
-                                </a>
-                                Making this the first true generator on the Internet. It uses a dictionary of.
-                                <br/>
-                                <a href="#" class="small">
-                                    <i class="fa fa-thumbs-up"></i> 11 Like this!</a> -
-                                <small class="text-muted">10.07.2014</small>
-                            </div>
-                        </div>
-
-                        <div class="social-comment">
-                            <a href="" class="pull-left">
-                                <img alt="image" class="img-circle" style="width: 42px; height:42px" src="../../../assets/images/profile.jpg">
-                            </a>
-                            <div class="media-body">
-                                <textarea class="form-control" placeholder="Write comment..."></textarea>
-                            </div>
-                        </div>
-
                     </div>
 
                 </div>
+
             </div>
             <div class="mail-box">
 
@@ -155,6 +161,7 @@
                     </div>
                 </div>
             </div>
+            <div class="alert alert-success" *ngIf="success">{{success}}</div>
             <div class="vote-item animated fadeInRight" *ngFor="let d of discuss|async">
                 <div class="row">
                     <div class="col-md-10">
@@ -162,7 +169,7 @@
                             <a>
                                 <i class="fa fa-chevron-up"> </i>
                             </a>
-                            <div>32</div>
+                            <div *ngIf="(d.comments| async) as c">{{c.length}}</div>
                             <a>
                                 <i class="fa fa-chevron-down"> </i>
                             </a>
@@ -172,18 +179,31 @@
                         </a>
                         <div class="vote-info">
                             <i class="fa fa-comments-o"></i>
-                            <a href="#">Comments (32)</a>
+                            <a href="#" *ngIf="(d.comments| async) as c">{{c.length}}</a>
                             <i class="fa fa-clock-o"></i>
-                            <a href="#">1 Hours ago</a>
+                            <a href="#">{{d.val.created_on | date : 'dd MM yyyy hh:mm a'}}</a>
                             <i class="fa fa-user"></i>
-                            <a href="#">Andrew Williams</a>
+                            <a *ngIf="(d.user$ | async) as u">{{u.data.display_name}}</a>
+                            <div *ngIf="d.val.creator" class="btn-group">
+                                <button class="btn-white btn btn-sm" [popover]="actionTemplate">
+                                    <i class="fa fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                            <ng-template #actionTemplate>
+                                <button class="btn white btn btn-xs" (click)="deleteDiscussion(d.key, createDiscuss)">
+                                    <i class="fa fa-trash-o"></i>
+                                </button>
+                                <button class="btn white btn btn-xs" (click)="editDiscussion(d.key, createDiscuss)">
+                                    <i class="fa fa-pencil"></i>
+                                </button>
+                            </ng-template>
                         </div>
                     </div>
-                    <div class="col-md-2 ">
+                    <!-- <div class="col-md-2 ">
                         <div class="vote-icon">
                             <i class="fa fa-css3"> </i>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -262,10 +282,14 @@
                                                 {{i + 1}}
                                             </td>
                                             <td>
-                                                <a href="{{m.data.url}}">
+                                                <!-- <a (href="{{m.data.url}}")>
+                                                    {{m.data.name}}
+                                                </a> -->
+                                                <a (click)="pdfModal.show()">
                                                     {{m.data.name}}
                                                 </a>
-                                                - <small *ngIf="(m.user$ | async) as u">{{u.data.display_name}}</small>
+                                                -
+                                                <small *ngIf="(m.user$ | async) as u">{{u.data.display_name}}</small>
                                             </td>
                                             <td>
                                                 {{m.data.created_on | date: 'dd/MM/yyyy hh:mm a'}}
@@ -433,7 +457,9 @@
                             {{c.val.comment}}
                             <br/>
                             <a (click)="like(c.key)" class="small">
-                                <i class="fa fa-thumbs-up"></i> {{c.val.likes}} Like this!</a> -
+                                <i class="fa fa-thumbs-up"></i> {{c.val.likes}} Like this!</a>
+                            <a class="small" (click)="deleteDiscComment(c.key,commentModal)">
+                                <i class="fa fa-trash-0" *ngIf="c.val.created_by === userId"></i> Delete</a> -
                             <small class="text-muted">{{c.val.created_on | date:'hh:mm a dd MMM yyyy'}}</small>
                         </div>
                     </div>
@@ -483,6 +509,31 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" (click)="closeModal(createDiscuss)">Cancel</button>
                 <button [disabled]="!newDiscuss.valid" type="button" class="btn btn-primary" (click)="create(newDiscuss, createDiscuss)">Add Discussion</button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="eDiscuss" class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Discussion</h5>
+            </div>
+            <div class="modal-body">
+                <form #newDiscuss="ngForm">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input *ngIf="(selected_discuss | async) as sd" type="text" id="title" name="title" #title="ngModel" [(ngModel)]="sd.title"
+                            required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea #desc *ngIf="(selected_discuss | async) as sd" type="text" id="description" name="description" #description="ngModel"
+                            [(ngModel)]="sd.description" required class="form-control" rows="4"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(createDiscuss)">Cancel</button>
+                <button [disabled]="!newDiscuss.valid" type="button" class="btn btn-primary" (click)="confirmEditDiscuss(newDiscuss, createDiscuss)">Edit Discussion</button>
             </div>
         </div>
     </div>
@@ -583,6 +634,231 @@
                 <button type="button" class="btn btn-secondary" (click)="closeModal(createDiscuss)">Cancel</button>
                 <button type="button" class="btn btn-danger" (click)="confirmDeleteMaterial(createDiscuss)">Delete</button>
             </div>
+        </div>
+    </div>
+    <div *ngIf="dDiscuss" class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Discussion</h5>
+            </div>
+            <div class="modal-body">
+                Are you sure to delete this discussion?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(createDiscuss)">Cancel</button>
+                <button type="button" class="btn btn-danger" (click)="confirmDeleteDiscuss(createDiscuss)">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #editActivity="bs-modal" class="modal" tabindex="-1" role="dialog">
+    <div *ngIf="edit_activity" class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Activity</h5>
+            </div>
+            <div class="modal-body">
+                <form #editForm="ngForm">
+                    <div class="form-group">
+                        <label for="desc">Description</label>
+                        <textarea *ngIf="(selected_activity | async) as s" rows="8" type="text" #title="ngModel" id="desc" name="desc" [(ngModel)]="s.data.description"
+                            required class="form-control"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(editActivity)">Cancel</button>
+                <button *ngIf="(selected_activity | async) as s" [disabled]="!editForm.valid" type="button" class="btn btn-primary" (click)="edit(editForm, s.key, editActivity)">Edit</button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="delete_activity" class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Activity</h5>
+            </div>
+            <div class="modal-body">
+                <p *ngIf="(selected_activity | async) as s">Are you sure to delete
+                    <strong>{{s.data.description}}</strong> ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(editActivity)">Cancel</button>
+                <button *ngIf="(selected_activity | async) as s" type="button" class="btn btn-danger" (click)="delete(s.key, editActivity)">Delete</button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="delete_comment" class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Comment</h5>
+            </div>
+            <div class="modal-body">
+                <p *ngIf="(selected_activity | async) as s">Are you sure to delete
+                    <strong>{{s.data.comment?s.data.comment:''}}</strong> ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(editActivity)">Cancel</button>
+                <button *ngIf="(selected_activity | async) as s" type="button" class="btn btn-danger" (click)="deleteCmt(s.key, editActivity)">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #commentModal="bs-modal" class="modal" tabindex="-1" role="dialog">
+    <div *ngIf="delete_dis_comment" class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Comment</h5>
+            </div>
+            <div class="modal-body">
+                <p *ngIf="(selected_activity | async) as s">Are you sure to delete
+                    <strong>{{s.data.comment?s.data.comment:''}}</strong> ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(commentModal)">Cancel</button>
+                <button *ngIf="(selected_activity | async) as s" type="button" class="btn btn-danger" (click)="delDiscComment(commentModal)">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #courseModal="bs-modal" class="modal" tabindex="-1" role="dialog">
+    <div *ngIf="edit_course" class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Course</h5>
+            </div>
+            <div class="modal-body">
+                <div *ngIf="success" class="alert alert-success">{{success}}</div>
+                <form #newCourse="ngForm">
+                    <div class="form-group">
+                        <label for="courseName">Course Name</label>
+                        <input *ngIf="(selected_course | async) as s" type="text" id="courseName" name="courseName" [ngModel]="s.data.course_name"
+                            required class="form-control">
+                    </div>
+                    <!-- <div class="form-group">
+              <label for="section">Section</label>
+              <input type="text" id="section" name="section" #section="ngModel" ngModel required class="form-control">
+            </div> -->
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea *ngIf="(selected_course | async) as s" type="text" id="description" name="description" [ngModel]="s.data.description"
+                            required class="form-control"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input *ngIf="(selected_course | async) as s" type="text" id="location" name="location" [ngModel]="s.data.location" required
+                            class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="startDate">Start Date</label>
+                        <input type="text" id="startDate" name="startDate" class="form-control" bsDatepicker required [ngModel]="sDate" [bsConfig]="{ dateInputFormat: 'DD-MM-YYYY' }">
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">End Date</label>
+                        <input type="text" id="endDate" name="endDate" class="form-control" bsDatepicker required [ngModel]="eDate" [bsConfig]="{ dateInputFormat: 'DD-MM-YYYY' }">
+                    </div>
+                    <!-- <div class="form-group">
+              <label for="courseLevel">Course level</label>
+              <div *ngFor="let l of level">
+                <input type="radio" name="courseLevel" id="courseLevel" ngModel [value]="l.id"> {{l.id}}
+              </div>
+            </div> -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(courseModal)">Cancel</button>
+                <button [disabled]="!newCourse.valid" type="button" class="btn btn-primary" (click)="saveEditCourse(newCourse, courseModal)">Save Course</button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="delete_course" class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Comment</h5>
+            </div>
+            <div class="modal-body">
+                <p *ngIf="(selected_course | async) as s">Are you sure to delete
+                    <strong>{{s.data.course_name?s.data.course_name:''}}</strong> ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(courseModal)">Cancel</button>
+                <button *ngIf="(selected_course | async) as s" type="button" class="btn btn-danger" (click)="confirmDeleteCourse(courseModal)">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #photoModal="bs-modal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Icon</h5>
+            </div>
+            <div class="modal-body">
+                <form #iconForm="ngForm">
+                    <div class="form-group">
+                        <label for="courseIcon">Course Icon</label>
+                        <input type="file" id="courseIcon" accept="image/*" name="courseName" (change)="handleFiles($event)" required class="form-control"
+                            ngModel>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(photoModal)">Cancel</button>
+                <button [disabled]="!iconForm.valid" type="button" class="btn btn-success" (click)="confirmChangeIcon(photoModal)">Change Icon</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #pdfModal="bs-modal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Pdf</h5>
+            </div>
+            <div class="modal-body">
+                <iframe style="height: 45vh; width:100%; display: block;" ngx-document [src]="pdfSrc | safe: 'resourceUrl'" provider="google"></iframe>
+                <div class="social-footer">
+                    <div>
+                        <div class="social-comment">
+                            <a href="" class="pull-left">
+                                <img alt="image" class="img-circle" style="width: 42px; height:42px" src="../../../assets/images/profile.jpg">
+                            </a>
+                            <div class="media-body">
+                                <a href="#">
+                                    Unknown
+                                </a>
+                                Hey !!
+                                <br/>
+                                <a class="small">
+                                    <i class="fa fa-thumbs-up"></i> 26 Like this!</a>
+                                <a class="small">
+                                    <i class="fa fa-trash-0"></i> Delete</a> -
+                                <small class="text-muted">dd MM yyyy hh:mm a</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="social-comment">
+                        <a href="" class="pull-left">
+                            <img alt="image" class="img-circle" style="width: 42px; height:42px" src="../../../assets/images/profile.jpg">
+                        </a>
+                        <div class="media-body">
+                            <form #commentForm="ngForm">
+                                <textarea class="form-control" name="comment" id="comment" ngModel placeholder="Write comment..."></textarea>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <!-- <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal(photoModal)">Cancel</button>
+                <button [disabled]="!iconForm.valid" type="button" class="btn btn-success" (click)="confirmChangeIcon(photoModal)">Change Icon</button>
+            </div> -->
         </div>
     </div>
 </div>

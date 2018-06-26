@@ -19,9 +19,8 @@ import { JVectorMapModule } from '../../components/map/jvectorMap';
 
 
 @NgModule({
-  declarations: [Dashboard2Component,Dashboard3Component,Dashboard4Component,Dashboard41Component,Dashboard5Component],
+  declarations: [Dashboard3Component,Dashboard4Component,Dashboard41Component,Dashboard5Component],
   imports     : [BrowserModule,ChartsModule, FlotModule,IboxtoolsModule,PeityModule,SparklineModule,JVectorMapModule],
-  exports     : [Dashboard2Component,Dashboard3Component,Dashboard4Component,Dashboard41Component,Dashboard5Component],
 })
 
 export class DashboardsModule {}

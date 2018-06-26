@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import {RouterModule} from "@angular/router";
-import {LocationStrategy, HashLocationStrategy} from '@angular/common';
 
 import { PopoverModule } from 'ngx-bootstrap/popover';
 
@@ -28,6 +27,11 @@ import {AngularFireDatabaseModule} from 'angularfire2/database';
 import { environment } from '../environments/environment';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './authGuard.service';
+import { SafePipeModule } from 'safe-pipe';
+
+//module
+// import { CalendarModule } from 'angular-calendar';
+// import { OwlDateTimeModule, OwlNativeDateTimeModule } from 'ng-pick-datetime';
 
 //layout
 import {BsDropdownModule, ModalModule} from 'ngx-bootstrap';
@@ -48,6 +52,16 @@ import { CommentsService } from './service/comments.service';
 import { StarterViewComponent } from './views/appviews/starterview.component';
 import { DashboardService } from './service/dashboard.service';
 
+//ngb
+import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
+import { CalendarModule } from 'angular-calendar';
+import { Dashboard2Component } from './views/dashboards/dashboard2.component';
+
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { DocumentViewModule } from 'ngx-document-view';
+
 
 @NgModule({
   declarations: [
@@ -63,7 +77,8 @@ import { DashboardService } from './service/dashboard.service';
     TopNavigationNavbarComponent,
     ForgotpasswordComponent,
     Dashboard1Component,
-    StarterViewComponent
+    StarterViewComponent,
+    Dashboard2Component
   ],
   imports: [
     BrowserModule,
@@ -79,7 +94,13 @@ import { DashboardService } from './service/dashboard.service';
     AngularFireDatabaseModule,
     BsDropdownModule.forRoot(),
     ModalModule.forRoot(),
-    PopoverModule.forRoot()
+    PopoverModule.forRoot(),
+    BsDatepickerModule.forRoot(),
+    CalendarModule.forRoot(),
+    BrowserAnimationsModule,
+    PdfViewerModule,
+    DocumentViewModule,
+    SafePipeModule
   ],
   providers: [AuthService, AuthGuard, UploadService, DiscussionService, CommentsService, DashboardService],
   bootstrap: [AppComponent],
@@ -92,7 +113,8 @@ import { DashboardService } from './service/dashboard.service';
     FooterComponent,
     TopNavigationNavbarComponent,
     Dashboard1Component,
-    StarterViewComponent
+    StarterViewComponent,
+    Dashboard2Component
   ]
 })
 export class AppModule { }

@@ -14,3 +14,16 @@
     margin-top:40px;
     height: 100px;
 }
+
+.bg-white{
+    background-color: white;
+    width: 350px;
+    position: relative;
+    left: 60%;
+    top: 15%;
+    border-radius: 15px;
+}
+
+/* .n-p-t{
+    padding-top: 0 !important;
+} */

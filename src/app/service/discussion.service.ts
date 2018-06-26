@@ -5,6 +5,7 @@ import * as firebase from 'firebase/app';
 import { Upload } from './upload.model';
 import { UploadService } from './upload.service';
 import * as _ from 'lodash';
+import * as moment from 'moment';
 
 @Injectable()
 export class DiscussionService {
@@ -17,7 +18,9 @@ export class DiscussionService {
   uploading:any;
   dis_id: any;
 
-  constructor(private db: AngularFireDatabase, private uploadService: UploadService) { }
+  constructor(private db: AngularFireDatabase, private uploadService: UploadService) {
+
+  }
 
   getId(course_id){
     this.cid = course_id;
@@ -55,13 +58,31 @@ export class DiscussionService {
     })
   }
 
-  getDicussion(){
+  getDicussion(uid){
     return this.db.list('discussion/'+this.cid+'/discussion_list').snapshotChanges().map(x => {
       return x.map(y => {
         const val = y.payload.val();
         const key = y.payload.key;
 
-        return {val,key}
+        if(val.created_by == uid){
+          val.creator = true;
+        }else{
+          val.creator = false;
+        }
+        
+        val.sendTime = moment(val.created_on).fromNow();
+
+        let comments = this.db.list('comments/'+ key +'/comment_list').valueChanges();
+
+        let user = this.db.object('users/' + val.created_by);
+        let user$ = user.snapshotChanges().map((u) => {
+          const data = u.payload.val();
+          const key = u.payload.key;
+
+          return {data,key}
+        })
+
+        return {val,key,comments,user$}
       })
     });
   }

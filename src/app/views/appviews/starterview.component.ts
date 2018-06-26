@@ -7,6 +7,8 @@ import { NgForm } from '@angular/forms';
 import * as firebase from 'firebase';
 import { DashboardService } from '../../service/dashboard.service';
 
+import * as moment from 'moment';
+
 @Component({
   selector: 'starter',
   templateUrl: 'starter.template.html'
@@ -45,6 +47,20 @@ export class StarterViewComponent implements OnDestroy, OnInit, OnChanges{
 
   comments : Observable<any>;
 
+  date = new Date();
+
+  task$ : Observable<any>;
+
+  task_key: any;
+
+  selected_task: Observable<any>;
+  edit_task: boolean = false;
+  delete_task:boolean = false;
+  create_task: boolean = false;
+
+  dkey: any;
+  delete_comment : Boolean = false;
+
 
   constructor(private cmt: CommentsService, private db: AngularFireDatabase, private afAuth: AngularFireAuth, private dbSvc: DashboardService) {
     this.nav = document.querySelector('nav.navbar');
@@ -77,6 +93,24 @@ export class StarterViewComponent implements OnDestroy, OnInit, OnChanges{
             return {data,key, comments};
           }).reverse();
         })
+
+        this.task$ = this.db.list('task/'+this.user_id+'/task_list').snapshotChanges().map(x => {
+          return x.map(y => {
+            const data = y.payload.val();
+            const key = y.payload.key;
+
+            data.mydate = new Date(data.date * 1000);
+            data.moment = moment(data.created_on).fromNow();
+
+            return {data,key};
+          })
+        })
+
+        this.task$.subscribe(x => {
+          x.forEach(y => {
+            console.log(y.data.mydate.getDate());
+          })
+        });
       }
     })
 
@@ -143,6 +177,22 @@ export class StarterViewComponent implements OnDestroy, OnInit, OnChanges{
     modal.show();
   }
 
+  addedTask(form, modal){
+
+    let date = new Date(form.value.date);    
+    const myEpoch = date.getTime()/1000.0;
+    
+    firebase.database().ref('task/'+this.user_id+'/task_list').push({
+      name: form.value.name,
+      description: form.value.desc,
+      created_on: firebase.database.ServerValue.TIMESTAMP,
+      date: myEpoch
+    })
+
+    modal.hide();
+  }
+
+
   deleteModal(key, modal) {
     this.delete_activity = true;
     this.selected_activity = this.db.object('dashboard/' + key).snapshotChanges().map((s) => {
@@ -206,6 +256,90 @@ export class StarterViewComponent implements OnDestroy, OnInit, OnChanges{
     setTimeout(() => {
       form.reset();
     }, 500);
+  }
+
+  deleteTask(key,modal){
+    this.delete_task = true;
+    this.task_key = key;
+    this.selected_task = this.db.object('task/'+this.user_id+'/task_list/'+key).valueChanges();
+    modal.show();
+  }
+
+  deletedTask(modal){
+    firebase.database().ref('task/'+this.user_id+'/task_list/'+this.task_key).remove();
+    this.delete_task = false;
+    modal.hide()
+  }
+
+  closeModal(modal){
+    this.delete_task = false;
+    this.edit_task = false;
+    this.create_task = false;
+    this.edit_activity = false;
+    this.delete_activity = false;
+    this.delete_comment = false;
+
+    modal.hide();
+  }
+
+  createdTask(modal){
+    this.create_task = true;
+    modal.show();
+  }
+
+  editTask(key, modal){
+    this.selected_task = this.db.object('task/'+this.user_id+'/task_list/'+key).snapshotChanges().map(x => {
+      const data = x.payload.val();
+      data.mydate = new Date(data.date * 1000);
+      
+      return {data};
+    });
+
+    this.task_key = key;
+    this.edit_task = true;
+    modal.show();
+  }
+
+  editedTask(form,modal){
+
+    let date = new Date(form.value.date);    
+    const myEpoch = date.getTime()/1000.0;
+
+    firebase.database().ref('task/'+this.user_id+'/task_list/'+this.task_key).update({
+      name: form.value.name,
+      description: form.value.desc,
+      created_on: firebase.database.ServerValue.TIMESTAMP,
+      date: myEpoch
+    });
+    
+    this.edit_task = false;
+    modal.hide();
+  }
+
+  deleteComment(key, dkey,modal){
+    this.dkey = dkey;
+    this.delete_comment = true;
+    this.selected_activity = this.db.object('/comments/' + dkey + '/comment_list/'+key).snapshotChanges().map((s) => {
+      const data = s.payload.val();
+      const key = s.key;
+
+      return {data, key};
+    });
+
+    modal.show();
+  }
+
+  deleteCmt(key, modal){
+    firebase.database().ref('/comments/' + this.dkey + '/comment_list/'+key).remove().then(() => {
+      this.delete_comment = false;
+      modal.hide();
+    }).then(() => {
+      document.body.scrollTop = document.documentElement.scrollTop = 0;
+      this.success = 'Your comments has been successfully removed';
+      setTimeout(() => {
+        this.success = null;
+      }, 3000);
+    });
   }
 
 

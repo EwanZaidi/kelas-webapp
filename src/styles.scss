@@ -1,2 +1,9 @@
 /* Import main Inspinia style */
 @import "assets/styles/style";
+// @import "../node_modules/angular-calendar/css/angular-calendar.css";
+// @import "~ng-pick-datetime/assets/style/picker.min.css";
+
+@import "../node_modules/ngx-bootstrap/datepicker/bs-datepicker.css";
+@import "../node_modules/angular-calendar/css/angular-calendar.css";
+
+bs-datepicker-container { z-index: 3000; }

@@ -72,6 +72,7 @@
                   </div>
                 </div>
                   <button [disabled]="!loginForm.valid" class="btn btn-primary block full-width m-b" (click)="login(loginForm)">Login</button>
+                  <button class="btn btn-danger block full-width m-b" (click)="loginGoogle()">Login with <i class="fa fa-google-plus"></i></button>                  
 
                   <a (click)="reset()">
                     <small>Forgot password?</small>

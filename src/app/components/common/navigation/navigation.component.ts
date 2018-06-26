@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { Location } from '@angular/common';
+import { Router, ActivatedRoute } from '@angular/router';
 import { NgForm } from '@angular/forms';
 import 'jquery-slimscroll';
 import { AngularFireAuth } from 'angularfire2/auth';
@@ -50,7 +51,14 @@ export class NavigationComponent implements OnInit {
   files;
   uploading: Upload;
 
-  constructor(private router: Router, private afAuth: AngularFireAuth, private db: AngularFireDatabase, private uploadService: UploadService ) {
+  startDate = new Date();
+  sDate = this.startDate.getDate();
+  endDate = new Date();
+  eDate = this.endDate.getDate();
+
+  course_key;
+
+  constructor(private router: Router, private afAuth: AngularFireAuth, private db: AngularFireDatabase, private uploadService: UploadService, private route: ActivatedRoute) {
     this.afAuth.authState.subscribe(x => {
       if (x) {
         this.userid = x.uid;
@@ -91,6 +99,8 @@ export class NavigationComponent implements OnInit {
           return { val, key }
         })
       });
+
+      this.courseList$.subscribe();
 
 
     })
@@ -138,7 +148,7 @@ export class NavigationComponent implements OnInit {
     this.meeting = !this.meeting;
   }
 
-  profileSubmit(profileForm,profileModal) {
+  profileSubmit(profileForm, profileModal) {
     this.db.object('/users/' + this.userid).update({
       display_name: profileForm.value.displayName,
       email: profileForm.value.email,
@@ -153,7 +163,7 @@ export class NavigationComponent implements OnInit {
     })
   }
 
-  aboutSubmit(aboutForm,profileModal) {
+  aboutSubmit(aboutForm, profileModal) {
     this.db.object('/users/' + this.userid).update({
       title: aboutForm.value.title,
       about: aboutForm.value.aboutYou
@@ -196,25 +206,64 @@ export class NavigationComponent implements OnInit {
     let ede = ed.getTime() / 1000.0;
 
     let text = this.makeid();
-    this.db.list('courses/course_list').push({
+    let x = this.db.list('courses/course_list').push({
       course_tag: text,
       course_name: newCourse.value.courseName,
-      section: newCourse.value.section,
       description: newCourse.value.description,
       location: newCourse.value.location,
       start_date: sde,
       end_date: ede,
-      course_level: newCourse.value.courseLevel,
       created_by: this.userid,
       created_on: firebase.database.ServerValue.TIMESTAMP
-    }).then((success) => {
+
+      // section: newCourse.value.section,
+      // course_level: newCourse.value.courseLevel,
+    }).then((ref) => {
+      this.course_key = ref.key;
+      const filesToUpload = this.files;
+      const filesIndex = _.range(filesToUpload.length);
+      _.each(filesIndex, (idx) => {
+        this.uploading = new Upload(filesToUpload[idx]);
+        this.uploadService.uploadFile3(this.uploading, ref.key);
+      });
+
+      // this.profile$.subscribe(x => {
+      //   firebase.database().ref(`classmates/${ref.key}/${this.userid}`).set({
+      //     email: x.val.email,
+      //     name: x.val.display_name,
+      //     title: x.val.title,
+      //     join_date: firebase.database.ServerValue.TIMESTAMP
+      //   })
+      // })
+
+    }).then(() => {
       this.success = 'Your course has been successfully added';
       document.body.scrollTop = document.documentElement.scrollTop = 0;
-      setTimeout(function () {
-        this.success = null
+      setTimeout(() => {
+        this.success = null;
+        newCourse.reset();
         createCourse.hide()
       }, 3000)
+    }).then(() => {
+      this.classmates();
     })
+
+
+
+  }
+
+  classmates() {
+    let a: Observable<any> = this.db.object('users/' + this.userid).valueChanges();
+
+    a.subscribe(x => {
+      firebase.database().ref(`classmates/${this.course_key}/${this.userid}`).set({
+        email: x.email,
+        name: x.display_name,
+        title: x.title,
+        join_date: firebase.database.ServerValue.TIMESTAMP
+      })
+    })
+
   }
 
   makeid() {
@@ -227,7 +276,21 @@ export class NavigationComponent implements OnInit {
     return text;
   }
 
-  ngOnInit() { }
+  ngOnInit() {
+    this.route.params.subscribe(() => {
+      this.courseList = this.db.list('/courses/course_list', ref => ref.orderByChild('created_by').equalTo(this.userid));
+      this.courseList$ = this.courseList.snapshotChanges().map(x => {
+        return x.map(y => {
+          const val = y.payload.val();
+          const key = y.payload.key;
+
+          return { val, key }
+        })
+      });
+
+      this.courseList$.subscribe();
+    })
+  }
 
   getPage(key) {
     this.router.navigateByUrl('/courses/' + key)
@@ -237,6 +300,11 @@ export class NavigationComponent implements OnInit {
     console.log(event.target.files);
     this.files = event.target.files;
     this.uploadFiles();
+  }
+
+  handleFiles2(event) {
+    console.log(event.target.files);
+    this.files = event.target.files;
   }
 
   uploadFiles() {
